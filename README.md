@@ -45,7 +45,7 @@ The deliverable is an H.264 MP4 under `output/`, not the preview JPEGs.
 
 ## What it does
 
-The pipeline turns each frame into a **relative** depth map and stylizes it as a grayscale video. It does not output meters, trajectories, or camera pose.
+The pipeline turns each frame into a **relative** depth map and stylizes it as a grayscale video.
 
 ![Web UI: upload a source video](assets/web-ui-en.png)
 
@@ -143,8 +143,6 @@ The UI is static HTML/CSS/JS served by FastAPI. No Node toolchain is required.
 
 The ⋮ menu has appearance pills (system / light / dark) and **Clear cache**, which deletes files under `input/` and `output/`. Stop any running job first.
 
-A leftover Streamlit entry (`streamlit run app.py`) still exists but is **not** the primary UI.
-
 ### CLI
 
 ```bash
@@ -239,7 +237,6 @@ motion-depth-analyzer/
 └── pyproject.toml
 ```
 
-Raw uploads and run outputs stay out of git. README images under `assets/` are the exception.
 
 ---
 

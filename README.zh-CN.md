@@ -45,7 +45,7 @@ Web 界面处理一段跑步短片：先看源片预览，再并排对照原片�
 
 ## 做什么
 
-管线把每一帧变成**相对**深度图，再风格化成灰度视频。不输出米、轨迹或相机位姿。
+管线把每一帧变成**相对**深度图，再风格化成灰度视频。
 
 ![Web 界面：上传源视频](assets/web-ui-zh.png)
 
@@ -143,8 +143,6 @@ python -m depth_capture.server
 
 顶栏 ⋮ 菜单可切换外观（系统 / 浅色 / 深色），以及 **清除缓存**（删除 `input/`、`output/` 下的文件）。清除前请先停掉正在跑的任务。
 
-旧的 Streamlit 入口（`streamlit run app.py`）仍保留，但**不是**主界面。
-
 ### 命令行
 
 ```bash
@@ -239,7 +237,6 @@ motion-depth-analyzer/
 └── pyproject.toml
 ```
 
-原始上传和运行输出不进 git。README 图片放在 `assets/`，作为例外。
 
 ---
 
