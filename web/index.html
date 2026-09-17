@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Motion Depth Analyzer</title>
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/favicon-256.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet" />
+    <script>
+      (function () {
+        var theme = localStorage.getItem("dc-theme") || "system";
+        var dark =
+          theme === "dark" ||
+          (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.classList.toggle("dark", dark);
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="toolbar">
+      <a class="brand" href="/" aria-label="Motion Depth Analyzer">
+        <img src="/logo.png" alt="Motion Depth Analyzer" />
+      </a>
+      <div class="toolbar-actions">
+      <div id="runStatus" class="run-status hidden">
+        <span class="run-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round">
+            <g class="runner">
+              <circle cx="14.2" cy="4.55" r="1.9" fill="currentColor" stroke="none" />
+              <path d="M13.5 6.6 11.7 13.3" />
+              <path class="limb arm-back" d="M13.1 7.9 8.2 10.5" />
+              <path class="limb arm-front" d="M13.1 7.9 18 9.7" />
+              <path class="limb leg-back" d="M11.7 13.3 7.9 20.2" />
+              <path class="limb leg-front" d="M11.7 13.3 16.4 20.2" />
+            </g>
+          </svg>
+        </span>
+        <button id="stopBtn" class="toolbar-btn" type="button" data-i18n="toolbar_stop">Stop</button>
+      </div>
+      <button id="langBtn" class="toolbar-btn" type="button" data-i18n="lang_next">EN</button>
+      <div class="menu">
+        <button id="menuBtn" class="toolbar-btn menu-trigger" type="button" aria-haspopup="true" aria-expanded="false">⋮</button>
+        <div id="menuPanel" class="menu-panel hidden" role="menu">
+          <div class="theme-pills" role="radiogroup">
+            <button type="button" class="theme-pill" data-theme="system">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 19h8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <span data-i18n="theme_system">系统</span>
+            </button>
+            <button type="button" class="theme-pill" data-theme="light">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 3v1.6M12 19.4V21M4.9 4.9l1.1 1.1M18 18l1.1 1.1M3 12h1.6M19.4 12H21M4.9 19.1 6 18M18 6l1.1-1.1" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              <span data-i18n="theme_light">浅色</span>
+            </button>
+            <button type="button" class="theme-pill" data-theme="dark">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 3.6A8 8 0 1 0 20.4 14 6.4 6.4 0 0 1 15.5 3.6Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              <span data-i18n="theme_dark">深色</span>
+            </button>
+          </div>
+          <button type="button" id="clearCacheBtn" class="menu-action" data-i18n="clear_cache">清除缓存</button>
+        </div>
+      </div>
+      </div>
+    </header>
+    <div class="block-container">
+      <h1 data-i18n="app_title">Motion Depth Analyzer</h1>
+      <p class="caption" data-i18n="app_desc">逐帧动作深度分析器</p>
+
+      <div class="uploader-label">
+        <span data-i18n="upload">上传视频</span>
+      </div>
+      <label id="dropzone" class="dropzone">
+        <input id="fileInput" type="file" accept=".mp4,.mov,.avi,.mkv,.webm,video/*" />
+        <svg class="dropzone-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="currentColor" d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
+        </svg>
+        <div class="dropzone-copy">
+          <strong data-i18n="upload_drop">Drag and drop file here</strong>
+          <span data-i18n="upload_limit">Limit 500MB per file • MP4, MOV, AVI, MKV, WEBM</span>
+        </div>
+        <span class="browse" data-i18n="browse">Browse files</span>
+      </label>
+      <div id="fileChip" class="file-chip hidden">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13z"/></svg>
+        <span id="fileChipName">—</span>
+        <em id="fileChipSize"></em>
+      </div>
+      <p id="uploadHint" class="info" data-i18n="upload_hint">请选择本地视频（mp4 / mov / avi / mkv / webm）</p>
+
+      <section id="sourceSection" class="hidden">
+        <h2 data-i18n="original">原始视频</h2>
+        <video id="sourceVideo" controls playsinline></video>
+        <div class="metric-grid">
+          <div class="metric-card"><span data-i18n="metric_video">视频</span><strong id="metricName">—</strong></div>
+          <div class="metric-card"><span data-i18n="metric_res">分辨率</span><strong id="metricRes">—</strong></div>
+          <div class="metric-card"><span data-i18n="metric_fps">FPS</span><strong id="metricFps">—</strong></div>
+          <div class="metric-card"><span data-i18n="metric_duration">时长</span><strong id="metricDuration">—</strong></div>
+        </div>
+        <p id="metricFrames" class="muted"></p>
+
+        <h2 data-i18n="params">参数设置</h2>
+        <div class="field-head">
+          <label for="scale" data-i18n="scale">处理分辨率倍率</label>
+          <span class="help-wrap">
+            <button type="button" class="help" aria-expanded="false" aria-describedby="scaleHelp">?</button>
+            <span id="scaleHelp" class="help-tip" role="tooltip" data-i18n="scale_help">控制模型推理分辨率。范围 0.25–1.0，越小越快，细节会略少。默认 0.5。</span>
+          </span>
+          <em id="scaleVal">0.5</em>
+        </div>
+        <input id="scale" type="range" min="0.25" max="1" step="0.25" value="0.5" />
+
+        <div class="field-head">
+          <label for="stride" data-i18n="stride">抽帧间隔</label>
+          <span class="help-wrap">
+            <button type="button" class="help" aria-expanded="false" aria-describedby="strideHelp">?</button>
+            <span id="strideHelp" class="help-tip" role="tooltip" data-i18n="stride_help">每隔 N 帧跑一次深度模型，中间帧复用上一张深度图。越大越快，快速动作可能更跳。</span>
+          </span>
+          <em id="strideVal">1</em>
+        </div>
+        <input id="stride" type="range" min="1" max="8" step="1" value="1" />
+
+        <div class="field-head">
+          <label for="gamma" data-i18n="gamma">灰阶曲线</label>
+          <span class="help-wrap">
+            <button type="button" class="help" aria-expanded="false" aria-describedby="gammaHelp">?</button>
+            <span id="gammaHelp" class="help-tip" role="tooltip" data-i18n="gamma_help">调整深度图灰阶。小于 1 会提亮近处，大于 1 整体更暗。</span>
+          </span>
+          <em id="gammaVal">0.7</em>
+        </div>
+        <input id="gamma" type="range" min="0.1" max="2" step="0.05" value="0.7" />
+
+        <div class="field-head">
+          <label for="crush" data-i18n="crush">远景压黑</label>
+          <span class="help-wrap">
+            <button type="button" class="help" aria-expanded="false" aria-describedby="crushHelp">?</button>
+            <span id="crushHelp" class="help-tip" role="tooltip" data-i18n="crush_help">按分位数把远处背景压向黑色，用来突出前景。数值越大，远景越黑。</span>
+          </span>
+          <em id="crushVal">35</em>
+        </div>
+        <input id="crush" type="range" min="0" max="90" step="1" value="35" />
+
+        <div class="field-head">
+          <label for="smooth" data-i18n="smooth">时序平滑</label>
+          <span class="help-wrap">
+            <button type="button" class="help" aria-expanded="false" aria-describedby="smoothHelp">?</button>
+            <span id="smoothHelp" class="help-tip" role="tooltip" data-i18n="smooth_help">相邻帧做指数滑动平均，减轻深度闪烁。0 表示关闭。</span>
+          </span>
+          <em id="smoothVal">0.4</em>
+        </div>
+        <input id="smooth" type="range" min="0" max="0.95" step="0.05" value="0.4" />
+
+        <div class="check-row">
+          <label class="check">
+            <input id="audio" type="checkbox" checked />
+            <span data-i18n="audio">保留原声音</span>
+          </label>
+          <span class="help-wrap">
+            <button type="button" class="help" aria-expanded="false" aria-describedby="audioHelp">?</button>
+            <span id="audioHelp" class="help-tip" role="tooltip" data-i18n="audio_help">输出视频是否保留原片声音。</span>
+          </span>
+        </div>
+
+        <button id="actionBtn" class="primary" type="button" data-i18n="process">开始处理</button>
+
+        <div id="progressWrap" class="hidden">
+          <div class="progress"><div id="progressBar"></div></div>
+          <div id="status" class="status"></div>
+          <figure id="previewSlot" class="hidden">
+            <img id="previewImage" alt="" />
+            <figcaption data-i18n="preview_caption">处理预览</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section id="resultSection" class="hidden">
+        <h2 data-i18n="output">输出预览</h2>
+        <div class="preview-cols">
+          <div>
+            <p class="caption">Original</p>
+            <video id="resultSource" controls playsinline></video>
+          </div>
+          <div>
+            <p class="caption">Depth</p>
+            <video id="resultDepth" controls playsinline></video>
+          </div>
+        </div>
+        <a id="downloadBtn" class="primary download" href="#" download data-i18n="download">下载处理后视频</a>
+      </section>
+    </div>
+    <script src="/i18n.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "motion-depth-analyzer"
+version = "0.1.0"
+description = "Local relative-depth video: near-white / far-black motion for generative models"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+authors = [{ name = "Motion Depth Analyzer Contributors" }]
+keywords = ["depth-estimation", "video", "depth-anything", "motion-capture"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Multimedia :: Video",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+]
+dependencies = [
+    "opencv-python>=4.8.0",
+    "numpy>=1.24.0",
+    "streamlit>=1.32.0",
+    "torch>=2.2.0",
+    "torchvision>=0.17.0",
+    "transformers>=4.41.0",
+    "pillow>=10.0.0",
+    "huggingface_hub>=0.23.0",
+    "tqdm>=4.66.0",
+    "fastapi>=0.110.0",
+    "uvicorn>=0.27.0",
+    "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4.0", "httpx>=0.27.0"]
+
+[project.scripts]
+depth-capture = "depth_capture.cli:main"
+depth-capture-web = "depth_capture.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
